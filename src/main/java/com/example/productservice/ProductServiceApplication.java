@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.info.Info;
 )
 public class ProductServiceApplication {
     public static void main(String[] args) {
+        System.out.println("Test changes");
         SpringApplication.run(ProductServiceApplication.class, args);
     }
 }
