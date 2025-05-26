@@ -1,11 +1,30 @@
-# Use a lightweight JDK base image
-FROM openjdk:11-jdk-slim
+# Stage 1 - builder
 
-# Set a working directory inside the container
-WORKDIR /app
+#maven Image
+FROM maven:3.8.3-openjdk-17 AS builder
 
-# Copy the built jar file into the container
-COPY target/product-service-1.0-SNAPSHOT.jar app.jar
+# set working directory
+WORKDIR /productserviceapp
 
-# Run the application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+#copy source from local to container
+COPY . /productserviceapp
+
+# build application and skip test cases
+RUN mvn clean install -DskipTests=true
+
+
+# Stage 2 - Execute jar files from build
+# Use a base image with a suitable JRE (Java Runtime Environment)
+FROM openjdk:17-jdk-slim
+
+# Set the working directory in the container
+WORKDIR /productserviceapp
+
+# Copy the JAR file into the container
+COPY --from=builder /productserviceapp/target/*.jar /productserviceapp/productservice.jar
+
+# Expose the port that your Spring Boot application runs on (usually 8080)
+EXPOSE 8000
+
+# Define the command to run the application
+CMD ["java", "-jar", "productservice.jar"]
